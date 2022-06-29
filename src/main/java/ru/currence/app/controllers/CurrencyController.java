@@ -11,6 +11,8 @@ import ru.currence.app.dao.CurrencyDAO;
 import ru.currence.app.dom.DomXml;
 import ru.currence.app.model.Currency;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -56,6 +58,36 @@ public class CurrencyController {
             }
           return "daily_currency";
         }
+
+    @GetMapping("/period-currency")
+    public String getCurrencyPeriod(@RequestParam("dateStart") @DateTimeFormat(pattern = "dd.MM.yyyy") Date dateCurStart,
+                                    @RequestParam("dateEnd") @DateTimeFormat(pattern = "dd.MM.yyyy") Date dateCurEnd,
+                                    @RequestParam("code") String code, Model model) throws Exception
+    {
+      List<Currency> curPeriod = new ArrayList<>();
+      Calendar calendar = Calendar.getInstance();
+      Currency curTmp;
+
+      while(dateCurStart.compareTo(dateCurEnd)<=0)
+      {
+          curTmp=currencyDAO.showCurrencyOnDate(dateCurStart,code);
+          if(curTmp==null)
+          {
+              domXml.parsingXML(dateCurStart,1, currencyDAO);
+              curTmp=currencyDAO.showCurrencyOnDate(dateCurStart, code);
+          }
+
+          curPeriod.add(curTmp);
+          calendar.setTime(dateCurStart);
+          calendar.add(Calendar.DAY_OF_MONTH, 1);
+          dateCurStart = calendar.getTime();
+      }
+
+      model.addAttribute("currency",curPeriod);
+
+
+        return "period_currency";
+    }
 
 
 }

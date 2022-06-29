@@ -8,6 +8,7 @@
 <table>
     <caption><b>Курсы валют</b></caption>
     <tr>
+        <th>дата</th>
         <th>код</th>
         <th>цифровой код</th>
         <th>буквенный код</th>
@@ -18,6 +19,7 @@
 
 <div th:each="cur : ${currency_}">
     <tr>
+        <td th:text="${cur.getDateRequest()}"> valute </td>
         <td th:text="${cur.getidCurrencyCbru()}"> valute </td>
         <td th:text="${cur.getNumCode()}"> valute </td>
         <td th:text="${cur.getCharCode()}"> valute </td>

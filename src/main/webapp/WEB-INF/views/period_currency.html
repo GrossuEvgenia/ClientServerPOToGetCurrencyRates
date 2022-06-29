@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Курс за период</title>
+</head>
+<body>
+<table>
+<caption><b>Курс валюты</b></caption>
+<tr>
+    <th>дата</th>
+    <th>код</th>
+    <th>цифровой код</th>
+    <th>буквенный код</th>
+    <th>название</th>
+    <th>курс</th>
+</tr>
+
+<div th:each="cur : ${currency}">
+    <tr>
+        <td th:text="${cur.getDateRequest()}"> valute </td>
+        <td th:text="${cur.getidCurrencyCbru()}"> valute </td>
+        <td th:text="${cur.getNumCode()}"> valute </td>
+        <td th:text="${cur.getCharCode()}"> valute </td>
+        <td th:text="${cur.getNameCurrency()}"> valute </td>
+        <td th:text="${cur.getValueCurrency()}"> valute </td>
+    </tr>
+</div>
+</table>
+</body>
+</html>

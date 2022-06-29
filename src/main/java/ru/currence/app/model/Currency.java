@@ -3,6 +3,8 @@ package ru.currence.app.model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 public class Currency {
 
@@ -11,6 +13,7 @@ public class Currency {
     private String charCode;
     private String numCode;
     private double valueCurrency;
+    private Date dateRequest;
 
     @Autowired
     public Currency(){}
@@ -35,6 +38,10 @@ public class Currency {
         return numCode;
     }
 
+    public Date getDateRequest() {
+        return dateRequest;
+    }
+
     public void setidCurrencyCbru(String idCurrencyCbru) {
         this.idCurrencyCbru = idCurrencyCbru;
     }
@@ -53,5 +60,9 @@ public class Currency {
 
     public void setValueCurrency(double valueCurrency) {
         this.valueCurrency = valueCurrency;
+    }
+
+    public void setDateRequest(Date dateRequest) {
+        this.dateRequest = dateRequest;
     }
 }

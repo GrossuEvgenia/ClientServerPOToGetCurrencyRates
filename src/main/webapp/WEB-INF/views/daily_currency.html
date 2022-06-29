@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Курс по определенной валюте за дату</title>
+</head>
+<body>
+<table>
+  <caption><b>Курс валюты</b></caption>
+  <tr>
+    <th>код</th>
+    <th>цифровой код</th>
+    <th>буквенный код</th>
+    <th>название</th>
+    <th>курс</th>
+  </tr>
+
+
+
+    <tr>
+      <td th:text="${currency_.getidCurrencyCbru()}"> valute </td>
+      <td th:text="${currency_.getNumCode()}"> valute </td>
+      <td th:text="${currency_.getCharCode()}"> valute </td>
+      <td th:text="${currency_.getNameCurrency()}"> valute </td>
+      <td th:text="${currency_.getValueCurrency()}"> valute </td>
+    </tr>
+
+
+</table>
+</body>
+</html>

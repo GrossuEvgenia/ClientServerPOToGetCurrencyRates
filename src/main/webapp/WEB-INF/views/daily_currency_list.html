@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Список валют за дату</title>
+</head>
+<body>
+<table>
+    <caption><b>Курсы валют</b></caption>
+    <tr>
+        <th>код</th>
+        <th>цифровой код</th>
+        <th>буквенный код</th>
+        <th>название</th>
+        <th>курс</th>
+    </tr>
+
+
+<div th:each="cur : ${currency_}">
+    <tr>
+        <td th:text="${cur.getidCurrencyCbru()}"> valute </td>
+        <td th:text="${cur.getNumCode()}"> valute </td>
+        <td th:text="${cur.getCharCode()}"> valute </td>
+        <td th:text="${cur.getNameCurrency()}"> valute </td>
+        <td th:text="${cur.getValueCurrency()}"> valute </td>
+    </tr>
+</div>
+</table>
+<br/>
+<hr/>
+
+
+
+</body>
+</html>
+© 2022 GitHub, Inc.
+Footer navigation
+Terms
+Privac

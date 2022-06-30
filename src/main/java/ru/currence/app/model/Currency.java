@@ -3,6 +3,7 @@ package ru.currence.app.model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Component
@@ -64,5 +65,16 @@ public class Currency {
 
     public void setDateRequest(Date dateRequest) {
         this.dateRequest = dateRequest;
+    }
+
+
+    public int parseDateToInt()
+    {
+        int day;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        String dateStr = simpleDateFormat.format(dateRequest);
+        String date [] = dateStr.split(".");
+        day=Integer.parseInt(date[0]);
+        return day;
     }
 }

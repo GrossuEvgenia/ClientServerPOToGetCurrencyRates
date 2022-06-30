@@ -1,7 +1,9 @@
 package ru.currence.app.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.currence.app.model.Currency;
@@ -50,5 +52,17 @@ public class CurrencyDAO {
         String dateFormat= sdf.format(dateCur);
         dateCur = sdf.parse(dateFormat);
         return  dateCur;
+    }
+
+    public boolean checkExistData( Date dateCur) throws ParseException {
+        dateCur=dateConvert(dateCur);
+        Currency cur =jdbcTemplate.query("SELECT * FROM currency WHERE date_request=?",
+                new Object[]{dateCur} , new BeanPropertyRowMapper<>(Currency.class)).
+                stream().findAny().orElse(null);
+        if(cur==null)
+            return false;
+        return true;
+
+
     }
 }

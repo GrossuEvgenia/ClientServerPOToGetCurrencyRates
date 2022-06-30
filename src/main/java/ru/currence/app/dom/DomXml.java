@@ -68,7 +68,10 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
                 Node currency = currencys.item(i);
                 NamedNodeMap currencyAttribute = currency.getAttributes();
                 Currency concreteCurrency = new Currency();
-                concreteCurrency.setidCurrencyCbru(currencyAttribute.getNamedItem("ID").getNodeValue());
+                if(currencyAttribute!=null) {
+
+                    concreteCurrency.setidCurrencyCbru(currencyAttribute.getNamedItem("ID").getNodeValue());
+                }
                 // Если нода не текст, то это книга - заходим внутрь
                 if (currency.getNodeType() != Node.TEXT_NODE) {
                     NodeList currencyTmp = currency.getChildNodes();

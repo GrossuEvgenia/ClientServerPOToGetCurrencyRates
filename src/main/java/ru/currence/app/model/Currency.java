@@ -13,14 +13,18 @@ public class Currency {
     private String nameCurrency;
     private String charCode;
     private String numCode;
-    private double valueCurrency;
+    private double currencyValue;
     private Date dateRequest;
+
+    private double nominal;
+
+    private String parentCode;
 
     @Autowired
     public Currency(){}
 
-    public double getValueCurrency() {
-        return valueCurrency;
+    public double getCurrencyValue() {
+        return currencyValue;
     }
 
     public String getCharCode() {
@@ -43,7 +47,15 @@ public class Currency {
         return dateRequest;
     }
 
-    public void setidCurrencyCbru(String idCurrencyCbru) {
+    public double getNominal() {
+        return nominal;
+    }
+
+    public String getParentCode() {
+        return parentCode;
+    }
+
+    public void setIdCurrencyCbru(String idCurrencyCbru) {
         this.idCurrencyCbru = idCurrencyCbru;
     }
 
@@ -59,14 +71,21 @@ public class Currency {
         this.numCode = numCode;
     }
 
-    public void setValueCurrency(double valueCurrency) {
-        this.valueCurrency = valueCurrency;
+    public void setCurrencyValue(double currencyValue) {
+        this.currencyValue = currencyValue;
     }
 
     public void setDateRequest(Date dateRequest) {
         this.dateRequest = dateRequest;
     }
 
+    public void setNominal(double nominal) {
+        this.nominal = nominal;
+    }
+
+    public void setParentCode(String parentCode) {
+        this.parentCode = parentCode;
+    }
 
     public int parseDateToInt()
     {

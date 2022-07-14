@@ -16,124 +16,30 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Component
+//класс для парсинга
 public class DomXml {
-   // private static AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-         //   SpringConfig.class
-    //);
-  //  private HttpResponse;
 
 
 
-public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws Exception{
-
-        //public static void main(String[] args) throws Exception {
-
-      //  List<Currency> currencyList = new ArrayList<>();
- /*       DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/currency_db");
-        dataSource.setUsername("postgres");
-        dataSource.setPassword("1234");
-        CurrencyDAO dao= new CurrencyDAO(new JdbcTemplate(dataSource));
-*/
-
-        try {
-            // Создается построитель документа
-            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            // Создается дерево DOM документа из файла
-            String urlRequest="";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-            switch(par)
-            {
-                case 1:
-
-                    urlRequest="http://www.cbr.ru/scripts/XML_daily.asp?date_req="+simpleDateFormat.format(date_cur);
-                    break;
-
-            }
-
-           // Document document = documentBuilder.parse("http://www.cbr.ru/scripts/XML_daily.asp?date_req=11/01/2022");
-            Document document = documentBuilder.parse(urlRequest);
-
-            // Получаем корневой элемент
-            Node root = document.getDocumentElement();
-
-            // Просматриваем все подэлементы корневого - т.е. книги
-            NodeList currencys = root.getChildNodes();
-            for (int i = 0; i < currencys.getLength(); i++) {
-                Node currency = currencys.item(i);
-                NamedNodeMap currencyAttribute = currency.getAttributes();
-                Currency concreteCurrency = new Currency();
-                if(currencyAttribute!=null) {
-
-                    concreteCurrency.setIdCurrencyCbru(currencyAttribute.getNamedItem("ID").getNodeValue());
-                }
-                // Если нода не текст, то это книга - заходим внутрь
-                if (currency.getNodeType() != Node.TEXT_NODE) {
-                    NodeList currencyTmp = currency.getChildNodes();
-                    for(int j = 0; j < currencyTmp.getLength(); j++) {
-                        Node currencyTmp1 = currencyTmp.item(j);
-                        // Если нода не текст, то это один из параметров книги - печатаем
-                        if (currencyTmp1.getNodeType() != Node.TEXT_NODE) {
-                            switch (currencyTmp1.getNodeName())
-                            {
-                                case "NumCode":
-                                    concreteCurrency.setNumCode(currencyTmp1.getChildNodes().item(0).getNodeValue());
-                                    break;
-                                case "CharCode":
-                                    concreteCurrency.setCharCode(currencyTmp1.getChildNodes().item(0).getNodeValue());
-                                    break;
-                                case "Name":
-                                    concreteCurrency.setNameCurrency(currencyTmp1.getChildNodes().item(0).getNodeValue());
-                                    break;
-                                case "Value":
-                                    concreteCurrency.setCurrencyValue(Double.parseDouble(
-                                            currencyTmp1.getChildNodes().item(0).getNodeValue().
-                                                    replace(",",".")));
-                                    break;
-                            }
-
-                        }
-
-                    }
-
-                    currencyDAO.insert(concreteCurrency, date_cur);
-
-                }
-            }
-
-
-        } catch (ParserConfigurationException ex) {
-            ex.printStackTrace(System.out);
-        } catch (SAXException ex) {
-            ex.printStackTrace(System.out);
-        } catch (IOException ex) {
-            ex.printStackTrace(System.out);
-        }
-
-        System.out.println("parsing sucsefuly");
-
-      //  context.close();
-    }
-
+    //парсинг информауии о валютах
     public void parsingInfoAboutCurrency(CurrencyDAO currencyDAO, String par) throws Exception
     {
         try{
         // Создается построитель документа
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        // Создается дерево DOM документа из файла
+        // Создается дерево DOM документа из url запроса
         String urlRequest="https://www.cbr.ru/scripts/XML_valFull.asp?d="+par;
         Document document = documentBuilder.parse(urlRequest);
 
         // Получаем корневой элемент
         Node root = document.getDocumentElement();
 
-        // Просматриваем все подэлементы корневого - т.е. книги
+        // Просматриваем все подэлементы корневого
         NodeList currencys = root.getChildNodes();
         for (int i = 0; i < currencys.getLength(); i++) {
             Node currency = currencys.item(i);
@@ -143,12 +49,12 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
 
                 concreteCurrency.setIdCurrencyCbru(currencyAttribute.getNamedItem("ID").getNodeValue());
             }
-            // Если нода не текст, то это книга - заходим внутрь
+            // Если нода не текст, то - заходим внутрь
             if (currency.getNodeType() != Node.TEXT_NODE) {
                 NodeList currencyTmp = currency.getChildNodes();
                 for(int j = 0; j < currencyTmp.getLength(); j++) {
                     Node currencyTmp1 = currencyTmp.item(j);
-                    // Если нода не текст, то это один из параметров книги - печатаем
+                    // Если нода не текст, то это один из параметров
                     if (currencyTmp1.getNodeType() != Node.TEXT_NODE) {
                         switch (currencyTmp1.getNodeName())
                         {
@@ -187,8 +93,10 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
                     }
 
                 }
-
-                currencyDAO.insertCurrencyInfo(concreteCurrency);
+                //если подобного кода нет то добавляем в бд
+                if(currencyDAO.findCodeInBD(concreteCurrency.getidCurrencyCbru())==false) {
+                    currencyDAO.insertCurrencyInfo(concreteCurrency);
+                }
 
             }
         }
@@ -205,16 +113,22 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
         System.out.println("parsing sucsefuly");
     }
 
+
+    //парсинг валюты
     public List<Currency> parsingPageWithCurrency(Date dateCur, Date dateEnd, String code,
                                         CurrencyDAO currencyDAO, int par, List<Currency> curPeriod) throws Exception
     {
         Date dateTmp;
+        List<Currency> currencyListTmp=new ArrayList<>();
+        int index=0;
+        int sizeList=curPeriod.size();
         try {
             // Создается построитель документа
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            // Создается дерево DOM документа из файла
+            // Создается дерево DOM документа из url запросса
             String urlRequest="";
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
+            //проерка на полученные параметр
             switch(par)
             {
                 case 1:
@@ -235,12 +149,13 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
             NamedNodeMap currencyAttribute = root.getAttributes();
             String id="";
 
+            //ели парсим период
             if(par==2)
             {
                 id=currencyAttribute.getNamedItem("ID").getNodeValue();
             }
 
-            // Просматриваем все подэлементы корневого - т.е. книги
+            // Просматриваем все подэлементы корневого
             NodeList currencys = root.getChildNodes();
             for (int i = 0; i < currencys.getLength(); i++) {
                 Node currency = currencys.item(i);
@@ -248,7 +163,7 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
                 Currency concreteCurrency = new Currency();
                 if(currencyAttribute!=null) {
 
-
+                    //если парсим период
                     if(par==2)
                     {
                         concreteCurrency.setIdCurrencyCbru(id);
@@ -261,7 +176,7 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
                         concreteCurrency.setDateRequest(dateCur);
                     }
                 }
-                // Если нода не текст, то это книга - заходим внутрь
+                // Если нода не текст, то  заходим внутрь
                 if (currency.getNodeType() != Node.TEXT_NODE) {
                     NodeList currencyTmp = currency.getChildNodes();
                     for(int j = 0; j < currencyTmp.getLength(); j++) {
@@ -281,32 +196,61 @@ public void parsingXML(Date date_cur, int par, CurrencyDAO currencyDAO) throws E
                         }
 
                     }
-                    if(par==1)
+                    //если парсим по дням
+                    if(par==1 && dateEnd==null)
                     {
-                        currencyDAO.insertCurrencyValue(concreteCurrency);
+                        //currencyDAO.insertCurrencyValueDaily(concreteCurrency);
+                        curPeriod.add(concreteCurrency);
                     }
-                    else
-                    {
+                    //если парим по дням в период
+                    else if (par==1 &&dateEnd!=null && concreteCurrency.getidCurrencyCbru().equals(code) || par==2) {
+                       // currencyDAO.insertCurrencyValuePeriod(concreteCurrency);
+                   // }
+                    //если парсим период
+                    //else if(par==2)
+                    //{
                         boolean flag=true;
-                        for(Currency c:curPeriod)
+                        //проверям есть ли дата в списке
+                     /*   for(Currency c:curPeriod)
                         {
                             if(c.getDateRequest().compareTo(concreteCurrency.getDateRequest())==0)
                             {
                                 flag=false;
                                 break;
                             }
+                        }*/
+
+                        for(int j=index; j<curPeriod.size();j++)
+                        {
+                            if(curPeriod.get(j).getDateRequest().compareTo(concreteCurrency.getDateRequest())==0)
+                            {
+                                index=j;
+                                flag=false;
+                                break;
+                            }
                         }
+
+
+                       // if(curPeriod.contains(concreteCurrency.getDateRequest()))
+                         //   flag=false;
                         if(flag)
                         {
-                            currencyDAO.insertCurrencyValue(concreteCurrency);
-                            curPeriod.add(concreteCurrency);
+                           // currencyDAO.insertCurrencyValuePeriod(concreteCurrency);
+                            currencyListTmp.add(concreteCurrency);
                         }
 
                     }
 
                 }
             }
-
+            if(currencyListTmp.size()>curPeriod.size()&&(par==2||dateEnd!=null))
+            {
+                currencyDAO.batchInsert(currencyListTmp);
+            }
+            else
+            {
+currencyDAO.batchInsertDaily(curPeriod);
+            }
 
         } catch (ParserConfigurationException ex) {
             ex.printStackTrace(System.out);

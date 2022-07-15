@@ -20,82 +20,99 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
+//функция для отображения списка курсов валюты за определенный период
 function PeriodForm () {
-    /* const options = [
-        { name: 'USD', cbid: 'R01235' },
-        { name: 'EUR', cbid: 'R01239' },
-        { name: 'DKK', cbid: 'R01215' }] */
-    //const options = ['R01235', 'R01239', 'R01215']
-    //const [message, setMessage] = useState("Choose Currency")
+    //выбранное значение (название валюты) в выпадающем списке
     const [options, setOptions] = useState(null)
+    //индикатор загрузки для кнопки
     const [isLoading, setIsLoading] = useState(false);
+    //первая дата периода
     const [date1, setDate1] = useState(null)
+    //вторая дата периода
     const [date2, setDate2] = useState(null)
+    //id код валюты
     const [cbid, setCbId] = useState('')
+    //состояние для отображения данных в случае их обнаружения или сообщения об ошибке
     const [state, setState] = useState(null)
+    //отображаемые данные (строки таблицы или сообщение об ошибке)
     const [displayData, setDisplayData] = useState(null)
+    //список значений для выпадающего списка
     const [archive, setArchive] = useState(null)
+    //точки для вывода графика в формате (дата, значение курса)
     const [dataCurr, setDataCurr] = useState(null)
+    //массив для точек графика
     const dataItems = []
     useEffect(() => { getArchive() }, [])
+    //функция для заполнения выпадающего списка значениями (названиями валют)
     async function getArchive() {
+        //получение данных с сервера
         const response = await axios.get('http://localhost:8080/currency/info')
         console.log(response.data.info)
         const temp = response.data
+        //заполнение списка с установкой значения по умолчанию
         setArchive(temp.info)
         setOptions(temp.info[0])
-        setCbId(temp.info[0].cbId)
-        //setOptions(Object.keys(temp.info).map(key => [key, temp.info[key]]))
+        setCbId(temp.info[0].idCurrencyCbru)
     }
+    //функция для отправки запроса на сервер и получения ответа в виде json файла
     async function fetchPosts(date1, date2, cbid) {
         setDate1(null)
         setDate2(null)
         setCbId('')
         try {
-          const url = ('http://localhost:8080/currency/period?' + new URLSearchParams({date1: date1.toLocaleDateString('fr-CH')})
-          + '&' + new URLSearchParams({date2: date2.toLocaleDateString('fr-CH')}) + '&' + new URLSearchParams({cbid: cbid}))
+          const url = ('http://localhost:8080/currency/period-currency?' + new URLSearchParams({dateStart: date1.toLocaleDateString('fr-CH')})
+          + '&' + new URLSearchParams({dateEnd: date2.toLocaleDateString('fr-CH')}) + '&' + new URLSearchParams({code: cbid}))
           console.log(url)
+          //получение данных с сервера
           const response = await axios.get(url)
           const temp = response.data
           setState(1)
           console.log(temp)
-          setDisplayData(temp.currency.map (
-            (currency, cbId) => {
+          //преобразование полученных данных в строки таблицы
+          setDisplayData(temp.currency_.map (
+            (currency, idCurrencyCbru) => {
+                //точка для графика
               const dataItem = {
-                value: currency.value,
-                date: new Date(currency.dateRec).toLocaleDateString()
+                value: currency.currencyValue,
+                date: new Date(currency.dateRequest).toLocaleDateString()
               }
+              //заполнение массива точками
               dataItems.push(dataItem)
               console.log(dataItem)
               console.log(dataItems)
               return (
                 <TableRow
-                  key={cbId}
-                  sx={{'&:last-child td, &:last-child th': {border: 0}}}>
-                  <TableCell component="th" scope="row">{currency.cbId}</TableCell>
-                  <TableCell align="left">{currency.cbIdP}</TableCell>
-                  <TableCell align="left">{currency.name}</TableCell>
-                  <TableCell align="left">{currency.numCode}</TableCell>
-                  <TableCell align="left">{currency.charCode}</TableCell>
-                  <TableCell align="left">{currency.nominal}</TableCell>
-                  <TableCell align="left">{currency.value}</TableCell>
-                  <TableCell align="left">{new Date(currency.dateRec).toLocaleDateString('fr-CA')}</TableCell>
-                </TableRow>
+                key={idCurrencyCbru}
+                sx={{'&:last-child td, &:last-child th': {border: 0}}}>
+                <TableCell component="th" scope="row">{currency.idCurrencyCbru}</TableCell>
+                <TableCell align="left">{currency.parentCode}</TableCell>
+                <TableCell align="left">{currency.nameCurrency}</TableCell>
+                <TableCell align="left">{currency.charCode}</TableCell>
+                <TableCell align="left">{currency.numCode}</TableCell>
+                <TableCell align="left">{currency.nominal}</TableCell>
+                <TableCell align="left">{currency.currencyValue}</TableCell>
+                <TableCell align="left">{new Date(currency.dateRequest).toLocaleDateString('fr-CA')}</TableCell>
+              </TableRow>
               )
             }
           ))
+          //присваивание заполненного массива константе для вывода графика
           setDataCurr(dataItems)
         } catch(e) {
+            //обработка возможных ошибок
           setState(0)
           setDisplayData('No data found')
         }
         setIsLoading(false)
       }
+      //функция для обработки нажатия на кнопку
       const handleClick = (e) => {
         e.preventDefault()
+        //обработка запроса, если даты введены
         if(date1 !== null && date2 !== null) {
           setIsLoading(true)
           fetchPosts(date1, date2, cbid)
+          //если нет - вывод сообщения об ошибке
         } else {
           setState(0)
           setDisplayData('Empty request')
@@ -104,6 +121,7 @@ function PeriodForm () {
     return (
         <div>
           <h2>Search by date</h2>
+          {/*календарь для выбора начальной даты*/}
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Input first date"
@@ -114,6 +132,7 @@ function PeriodForm () {
               renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
+          {/*календарь для выбора конечной даты*/}
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Input last date"
@@ -124,22 +143,20 @@ function PeriodForm () {
               renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
-          {/* <TextField id="outlined-basic" label="Input cbid" variant="outlined" value={cbid}
-            onChange={
-              (e) => setCbId(e.target.value)}
-          /> */}
+          {/*выпадающий список с названиями валют*/}
           <Autocomplete
             id="combo-box-demo"
             value={options}
             options={archive}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => option.nameCurrency}
             onChange={(e, value) => {
               setOptions(value)
-              setCbId(value.cbId)
+              setCbId(value.idCurrencyCbru)
             }}
             sx={{width: 260, marginTop: -7, marginLeft: 64.5}}
             renderInput={(params) => <TextField {...params} label="Currency"/>}
             />
+            {/*кнопка с индикатором загрузки*/}
           <LoadingButton
             variant="contained"
             onClick={handleClick}
@@ -150,21 +167,7 @@ function PeriodForm () {
                     top:'-55px',
                     left:'775px'}}>Fetch data
           </LoadingButton>
-          {/* <Accordion>
-                <AccordionSummary
-                  expandIcon={<ExpandMoreIcon />}
-                  aria-controls="panel1a-content"
-                  id="panel1a-header"
-                >
-                  <Typography>Accordion 1</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Typography>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-                    malesuada lacus ex, sit amet blandit leo lobortis eget.
-                  </Typography>
-                </AccordionDetails>
-              </Accordion> */}
+          {/*если данные найдены - вывод графика и таблицы, иначе - вывод сообщения об ошибке*/}
           {state === 1
             ? <div>
               <Accordion>
@@ -213,16 +216,16 @@ function PeriodForm () {
                   <TableContainer component={Paper}>
                     <Table aria-label="simple table">
                       <TableHead>
-                        <TableRow>
-                          <TableCell>CbId</TableCell>
-                          <TableCell align="left">CbIdP</TableCell>
-                          <TableCell align="center">Name</TableCell>
-                          <TableCell align="left">NumCode</TableCell>
-                          <TableCell align="left">CharCode</TableCell>
-                          <TableCell align="left">Nominal</TableCell>
-                          <TableCell align="left">Value</TableCell>
-                          <TableCell align="left">Date</TableCell>
-                        </TableRow>
+                      <TableRow>
+                      <TableCell>ID</TableCell>
+                      <TableCell align="left">Parent code</TableCell>
+                      <TableCell align="center">Name</TableCell>
+                      <TableCell align="left">Char Code</TableCell>
+                      <TableCell align="left">Num Code</TableCell>
+                      <TableCell align="left">Nominal</TableCell>
+                      <TableCell align="left">Value</TableCell>
+                      <TableCell align="left">Date</TableCell>
+                    </TableRow>
                       </TableHead>
                       <TableBody>
                         {displayData}

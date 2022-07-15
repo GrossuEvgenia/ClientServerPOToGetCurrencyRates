@@ -13,94 +13,70 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
+//функция для отображения списка курсов валют по определенной дате
 function DailyForm () {
+    //индикатор загрузки для кнопки
     const [isLoading, setIsLoading] = useState(false);
+    //выбранная дата
     const [date, setDate] = useState(null)
+    //состояние для отображения данных в случае их обнаружения или сообщения об ошибке
     const [state, setState] = useState(null)
+    //отображаемые данные (строки таблицы или сообщение об ошибке)
     const [displayData, setDisplayData] = useState(null)
+    //функция для отправки запроса на сервер и получения ответа в виде json файла
     async function fetchPosts(date) {
         setDate(null)
         try {
-          const url = ('http://localhost:8080/currency/all?' + new URLSearchParams({date: date.toLocaleDateString('fr-CH')}))
+          const url = ('http://localhost:8080/currency/daily-currency-list?' + new URLSearchParams({date: date.toLocaleDateString('fr-CH')}))
           console.log(url)
+          //получение данных с сервера
           const response = await axios.get(url)
           const temp = response.data
           setState(1)
-          //const tempDate = new Date(response.data.currency.dateRec)
-          //const tempDateStr = tempDate.getFullYear() + '-' + tempDate.getMonth() + '-' + tempDate.getDate()
-          /* const tempYear = new Intl.DateTimeFormat('en', {year: 'numeric'}).format(tempDate)
-          const tempMonth = new Intl.DateTimeFormat('en', {month: 'numeric'}).format(tempDate)
-          const tempDay = new Intl.DateTimeFormat('en', {day: 'numeric'}).format(tempDate) */
           console.log(temp)
-          setDisplayData(temp.currency.map (
-            (currency, cbId) => {
+          //преобразование полученных данных в строки таблицы
+          setDisplayData(temp.currency_.map (
+            (currency, idCurrencyCbru) => {
               return (
                 <TableRow
-                  key={cbId}
+                  key={idCurrencyCbru}
                   sx={{'&:last-child td, &:last-child th': {border: 0}}}>
-                  <TableCell component="th" scope="row">{currency.cbId}</TableCell>
-                  <TableCell align="left">{currency.cbIdP}</TableCell>
-                  <TableCell align="left">{currency.name}</TableCell>
-                  <TableCell align="left">{currency.numCode}</TableCell>
+                  <TableCell component="th" scope="row">{currency.idCurrencyCbru}</TableCell>
+                  <TableCell align="left">{currency.parentCode}</TableCell>
+                  <TableCell align="left">{currency.nameCurrency}</TableCell>
                   <TableCell align="left">{currency.charCode}</TableCell>
+                  <TableCell align="left">{currency.numCode}</TableCell>
                   <TableCell align="left">{currency.nominal}</TableCell>
-                  <TableCell align="left">{currency.value}</TableCell>
-                  <TableCell align="left">{new Date(currency.dateRec).toLocaleDateString('fr-CA')}</TableCell>
+                  <TableCell align="left">{currency.currencyValue}</TableCell>
+                  <TableCell align="left">{new Date(currency.dateRequest).toLocaleDateString('fr-CA')}</TableCell>
                 </TableRow>
               )
             }
           ))
         } catch(e) {
+            //обработка возможных ошибок
           setState(0)
           setDisplayData('No data found')
         }
         setIsLoading(false)
-        /* console.log(state)
-        setState(1)
-        console.log(state) */
-        /* const currencyList = temp.map(item => (
-          <li key={item.cbId}>{item}</li>
-        ))
-        console.log(currencyList)
-        return currencyList */
       }
-    
+      //функция для обработки нажатия на кнопку
       const handleClick = (e) => {
         e.preventDefault()
+        //обработка запроса, если дата введена
         if(date !== null) {
           setIsLoading(true)
           fetchPosts(date)
+          //если нет - вывод сообщения об ошибке
         } else {
           setState(0)
           setDisplayData('Empty request')
         }
-        /* e.preventDefault()
-        setIsLoading(true)
-        fetchPosts(date) */
       }
-      /* const DisplayData=response.data.map(
-        (currency)=>{
-            return(
-                <tr>
-                    <td>{currency.cbId}</td>
-                    <td>{currency.cbIdP}</td>
-                    <td>{currency.name}</td>
-                    <td>{currency.numCode}</td>
-                    <td>{currency.charCode}</td>
-                    <td>{currency.nominal}</td>
-                    <td>{currency.datarec}</td>
-                    <td>{currency.value}</td>
-                </tr>
-            )
-        }
-    ) */
     return (
         <div>
           <h2>Search by date</h2>
-          {/* <TextField id="outlined-basic" label="Input date" variant="outlined" value={date}
-            onChange={
-              (e) => setDate(e.target.value)}
-          /> */}
+          {/*календарь для выбора даты*/}
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               label="Input date"
@@ -111,40 +87,23 @@ function DailyForm () {
               renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
+          {/*кнопка с индикатором загрузки*/}
           <LoadingButton
             variant="contained"
             onClick={handleClick}
             loading={isLoading}
             style={{backgroundColor: 'darkslateblue', padding: '15px 30px', margin: '0px 10px'}}>Fetch data</LoadingButton>
-          {/* <TableContainer component={Paper}>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>CbId</TableCell>
-                    <TableCell align="left">CbIdP</TableCell>
-                    <TableCell align="center">Name</TableCell>
-                    <TableCell align="left">NumCode</TableCell>
-                    <TableCell align="left">CharCode</TableCell>
-                    <TableCell align="left">Nominal</TableCell>
-                    <TableCell align="left">Value</TableCell>
-                    <TableCell align="left">Date</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {displayData}
-                </TableBody>
-              </Table>
-            </TableContainer> */}
+            {/*если данные найдены - вывод таблицы, иначе - вывод сообщения об ошибке*/}
           {state === 1
             ? <TableContainer component={Paper}>
                 <Table aria-label="simple table">
                   <TableHead>
                     <TableRow>
-                      <TableCell>CbId</TableCell>
-                      <TableCell align="left">CbIdP</TableCell>
+                      <TableCell>ID</TableCell>
+                      <TableCell align="left">Parent code</TableCell>
                       <TableCell align="center">Name</TableCell>
-                      <TableCell align="left">NumCode</TableCell>
-                      <TableCell align="left">CharCode</TableCell>
+                      <TableCell align="left">Char Code</TableCell>
+                      <TableCell align="left">Num Code</TableCell>
                       <TableCell align="left">Nominal</TableCell>
                       <TableCell align="left">Value</TableCell>
                       <TableCell align="left">Date</TableCell>
